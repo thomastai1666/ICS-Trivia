@@ -3,7 +3,7 @@ import socket
 import select
 import sys
 import json
-from chat_utils import *
+from admin_utils import *
 import client_state_machine as csm
 
 import threading
@@ -89,7 +89,7 @@ class Client:
 
     def run_chat(self):
         self.init_chat()
-        self.system_msg += 'Welcome to Trivia\n'
+        self.system_msg += 'Welcome to the admin client\n'
         self.system_msg += 'Please enter your name: '
         self.output()
         while self.login() != True:

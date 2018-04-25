@@ -1,5 +1,6 @@
 """
 Created on Sun Apr  5 00:00:32 2015
+
 @author: zhengzhang
 """
 from chat_utils import *
@@ -58,7 +59,7 @@ class ClientSM:
             # todo: can't deal with multiple lines yet
             if len(my_msg) > 0:
 
-                if my_msg == 'quit':
+                if my_msg == 'q':
                     self.out_msg += 'See you next time!\n'
                     self.state = S_OFFLINE
 
@@ -73,13 +74,6 @@ class ClientSM:
                     self.out_msg += 'Here are all the users in the system:\n'
                     self.out_msg += logged_in
 
-                elif my_msg == 'join':
-                    mysend(self.s, json.dumps({"action":"join"}))
-
-                else:
-                    self.out_msg += menu
-                    
-                """
                 elif my_msg[0] == 'c':
                     peer = my_msg[1:]
                     peer = peer.strip()
@@ -98,14 +92,28 @@ class ClientSM:
                         self.out_msg += search_rslt + '\n\n'
                     else:
                         self.out_msg += '\'' + term + '\'' + ' not found\n\n'
-                """
+
+                elif my_msg[0] == 'p':
+                    poem_idx = my_msg[1:].strip()
+                    mysend(self.s, json.dumps({"action":"poem", "target":poem_idx}))
+                    poem = json.loads(myrecv(self.s))["results"][1:].strip()
+                    if (len(poem) > 0):
+                        self.out_msg += poem + '\n\n'
+                    else:
+                        self.out_msg += 'Sonnet ' + poem_idx + ' not found\n\n'
+
+                else:
+                    self.out_msg += menu
 
             if len(peer_msg) > 0:
                 peer_msg = json.loads(peer_msg)
                 if peer_msg["action"] == "connect":
-                    self.peer = peer_msg["from"]
-                    self.out_msg += 'Connected to Game Server ' + self.peer + '\n'
+                    #"{action":"connect", "target":"zz"}
+                    peer = peer_msg["from"]
+                    self.peer = peer
                     self.state = S_CHATTING
+                    self.out_msg += 'Connect to ' + peer + '. Chat away!\n\n'
+                    self.out_msg += '-----------------------------------\n'
 
 #==============================================================================
 # Start chatting, 'bye' for quit
@@ -120,12 +128,16 @@ class ClientSM:
                     self.peer = ''
             if len(peer_msg) > 0:    # peer's stuff, coming in
                 peer_msg = json.loads(peer_msg)
-                if peer_msg["action"] == "connect":
-                    self.out_msg += "(" + peer_msg["from"] + " joined)\n"
-                elif peer_msg["action"] == "disconnect":
-                    self.state = S_LOGGEDIN
-                else:
-                    self.out_msg += peer_msg["from"] + peer_msg["message"]
+                try:
+                    message = peer_msg["message"]
+                    if(message == "bye"):
+                        self.disconnect()
+                        self.state = S_LOGGEDIN
+                    else:
+                        print(message)
+                except:
+                    #print(peer_msg)
+                    print("Message not received")
 
 
             # Display the menu again

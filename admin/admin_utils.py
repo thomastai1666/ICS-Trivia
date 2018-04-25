@@ -8,11 +8,12 @@ CHAT_PORT = 1112
 SERVER = (CHAT_IP, CHAT_PORT)
 
 menu = "\n++++ Choose one of the following commands\n \
-        time: calendar time in the system\n \
-        who: to find out who else are there\n \
-        c _peer_: to connect to the _peer_ and chat\n \
-        ? _term_: to search your chat logs where _term_ appears\n \
-        q: to leave the chat system\n\n"
+        time: server calendar time\n \
+        who: list all players\n \
+        broadcast (message): display a message to everyone\n \
+        shutdown : shutdown server and kick all clients \
+        kick (name): kick player off gmae \
+        quit: leave the admin system\n\n"
 
 S_OFFLINE   = 0
 S_CONNECTED = 1

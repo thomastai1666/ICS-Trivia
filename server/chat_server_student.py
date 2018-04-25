@@ -9,7 +9,6 @@ import socket
 import select
 import sys
 import string
-import indexer
 import json
 import pickle as pkl
 from chat_utils import *
@@ -27,8 +26,6 @@ class Server:
         self.server.bind(SERVER)
         self.server.listen(5)
         self.all_sockets.append(self.server)
-        #initialize past chat indices
-        self.indices={}
 
     def new_client(self, sock):
         #add to all sockets and to new clients
@@ -51,12 +48,6 @@ class Server:
                         #add into the name to sock mapping
                         self.logged_name2sock[name] = sock
                         self.logged_sock2name[sock] = name
-                        #load chat history of that user
-                        if name not in self.indices.keys():
-                            try:
-                                self.indices[name]=pkl.load(open(name+'.idx','rb'))
-                            except IOError: #chat index does not exist, then create one
-                                self.indices[name] = indexer.Index(name)
                         print(name + ' logged in')
                         self.group.join(name)
                         mysend(sock, json.dumps({"action":"login", "status":"ok"}))
@@ -73,8 +64,6 @@ class Server:
     def logout(self, sock):
         #remove sock from all lists
         name = self.logged_sock2name[sock]
-        pkl.dump(self.indices[name], open(name + '.idx','wb'))
-        del self.indices[name]
         del self.logged_name2sock[name]
         del self.logged_sock2name[sock]
         self.all_sockets.remove(sock)
@@ -92,7 +81,9 @@ class Server:
 # handle connect request this is implemented for you
 #==============================================================================
             msg = json.loads(msg)
-            if msg["action"] == "connect":
+            if msg["action"] == "join":
+                self.sendGlobalMessage("Waiting for game to start...")
+                """
                 to_name = msg["target"]
                 from_name = self.logged_sock2name[from_sock]
                 if to_name == from_name:
@@ -109,11 +100,15 @@ class Server:
                 else:
                     msg = json.dumps({"action":"connect", "status":"no-user"})
                 mysend(from_sock, msg)
+                """
 #==============================================================================
 # handle messeage exchange: IMPLEMENT THIS
 #==============================================================================
             elif msg["action"] == "exchange":
                 # Find the list of people to send to and index message!!
+                from_name = self.logged_sock2name[from_sock]
+                print("Message from " + from_name + ": " +msg["message"])
+                """
                 ctime = time.strftime('%d.%m.%y,%H:%M', time.localtime())
                 from_name = self.logged_sock2name[from_sock]
                 from_msg = msg["message"]
@@ -127,26 +122,22 @@ class Server:
                     to_sock = self.logged_name2sock[g]
                     msg = json.dumps({"action":"exchange", "from": "[" + from_name + "]", "message":from_msg})
                     mysend(to_sock, msg)
+                """
 
 #==============================================================================
 # the "from" guy has had enough (talking to "to")!
 #==============================================================================
             elif msg["action"] == "disconnect":
-                from_name = self.logged_sock2name[from_sock]
-                the_guys = self.group.list_me(from_name)
-                self.group.disconnect(from_name)
-                the_guys.remove(from_name)
-                if len(the_guys) == 1:  # only one left
-                    g = the_guys.pop()
-                    to_sock = self.logged_name2sock[g]
-                    mysend(to_sock, json.dumps({"action":"disconnect"}))
+                pass
+                #from_name = self.logged_sock2name[from_sock]
+                #self.group.leave(from_name)
 #==============================================================================
 #                 listing available peers: IMPLEMENT THIS (Done)
 #==============================================================================
             elif msg["action"] == "list":
                 #pass
                 from_name = self.logged_sock2name[from_sock]
-                msg = self.group.list_all(from_name)
+                msg = self.group.list_all()
                 mysend(from_sock, json.dumps({"action":"list", "results":msg}))
 #==============================================================================
 #                 time
@@ -154,16 +145,6 @@ class Server:
             elif msg["action"] == "time":
                 ctime = time.strftime('%d.%m.%y,%H:%M', time.localtime())
                 mysend(from_sock, json.dumps({"action":"time", "results":ctime}))
-#==============================================================================
-#                 search: : IMPLEMENT THIS
-#==============================================================================
-            elif msg["action"] == "search":
-                search_rslt = "needs to use self.indices search to work"
-                target = msg["target"]
-                from_name = self.logged_sock2name[from_sock]
-                search_rslt = self.indices[from_name].search(target)
-                #Debug: print('server side search: ' + search_rslt)
-                mysend(from_sock, json.dumps({"action":"search", "results":search_rslt}))
 
 #==============================================================================
 #                 the "from" guy really, really has had enough
@@ -172,6 +153,22 @@ class Server:
         else:
             #client died unexpectedly
             self.logout(from_sock)
+    
+    def sendGlobalMessage(self, text):
+        everyone = list(self.group.list_members())
+        msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
+        status_msg = json.dumps({"action":"connect", "status":"request", "from":"[Server]"})
+        for person in everyone:
+            to_sock = self.logged_name2sock[person]
+            mysend(to_sock, status_msg)
+            mysend(to_sock, msg)
+            
+    def endServerChat(self):
+        disconnect_msg = json.dumps({"action":"disconnect"})
+        everyone = list(self.group.list_members())
+        for person in everyone:
+            mysend(to_sock, disconnect_msg)
+        
 
 #==============================================================================
 # main loop, loops *forever*
