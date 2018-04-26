@@ -41,7 +41,7 @@ class Trivia():
             questionNum = self.randomQuestion()
         self.usedQuestions.append(questionNum)
         self.currentQuestion = questionNum
-        return self.data[questionNum][0:4]
+        return self.data[questionNum][0:5]
     
     def getAnswer(self):
         return self.data[self.currentQuestion][-1]
@@ -55,9 +55,10 @@ class Trivia():
     def randomQuestion(self):
         return random.randint(0,self.totalQuestions-1)
     
-    
+"""
 game = Trivia()
 print(game.printData())
 for x in range(0,3):
     print(game.getQuestion())
     print(game.getAnswer())
+"""

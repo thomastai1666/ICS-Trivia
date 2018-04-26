@@ -106,6 +106,9 @@ class ClientSM:
                     self.peer = peer_msg["from"]
                     self.out_msg += 'Connected to Game Server ' + self.peer + '\n'
                     self.state = S_CHATTING
+                elif peer_msg["action"] == "leave":
+                    self.out_msg += 'You have been disconnected from the server.\n'
+                    self.state = S_OFFLINE
 
 #==============================================================================
 # Start chatting, 'bye' for quit
@@ -124,6 +127,9 @@ class ClientSM:
                     self.out_msg += "(" + peer_msg["from"] + " joined)\n"
                 elif peer_msg["action"] == "disconnect":
                     self.state = S_LOGGEDIN
+                elif peer_msg["action"] == "leave":
+                    self.out_msg += 'You have been disconnected from the server.\n'
+                    self.state = S_OFFLINE
                 else:
                     self.out_msg += peer_msg["from"] + peer_msg["message"]
 

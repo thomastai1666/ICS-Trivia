@@ -11,8 +11,9 @@ menu = "\n++++ Choose one of the following commands\n \
         time: server calendar time\n \
         who: list all players\n \
         broadcast (message): display a message to everyone\n \
-        shutdown : shutdown server and kick all clients \
-        kick (name): kick player off gmae \
+        shutdown : shutdown server and kick all clients\n \
+        kick (name): kick player from game and server\n \
+        start : start trivia game\n \
         quit: leave the admin system\n\n"
 
 S_OFFLINE   = 0

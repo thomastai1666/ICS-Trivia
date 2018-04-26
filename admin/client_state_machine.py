@@ -34,6 +34,13 @@ class ClientSM:
 #==============================================================================
         if self.state == S_LOGGEDIN:
             # todo: can't deal with multiple lines yet
+            
+            if len(peer_msg) > 0:
+                peer_msg = json.loads(peer_msg)
+                if peer_msg["action"] == "leave":
+                    self.out_msg += 'You have been disconnected from the server.\n'
+                    self.state = S_OFFLINE
+                    
             if len(my_msg) > 0:
 
                 if my_msg == 'quit':
@@ -62,25 +69,19 @@ class ClientSM:
                         self.out_msg += 'Connection unsuccessful\n'
                         
                 elif my_msg == 'shutdown':
-                    peer = my_msg[1:]
-                    peer = peer.strip()
-                    if self.connect_to(peer) == True:
-                        self.state = S_CHATTING
-                        self.out_msg += 'Connect to ' + peer + '. Chat away!\n\n'
-                        self.out_msg += '-----------------------------------\n'
-                    else:
-                        self.out_msg += 'Connection unsuccessful\n'
+                    mysend(self.s, json.dumps({"action":"shutdown"}))
+                    self.out_msg += 'Server successfully shut down\n'
+                    
+                elif my_msg == 'start':
+                    mysend(self.s, json.dumps({"action":"start"}))
+                    self.out_msg += 'Trivia is starting...\n'
                         
-                elif my_msg == 'broadcast':
-                    peer = my_msg[1:]
-                    peer = peer.strip()
-                    if self.connect_to(peer) == True:
-                        self.state = S_CHATTING
-                        self.out_msg += 'Connect to ' + peer + '. Chat away!\n\n'
-                        self.out_msg += '-----------------------------------\n'
-                    else:
-                        self.out_msg += 'Connection unsuccessful\n'
-
+                elif my_msg[:9] == 'broadcast':
+                    text = my_msg[10:]
+                    msg_to_send = json.dumps({"action":"broadcast","message":text})
+                    mysend(self.s, msg_to_send)
+                    self.out_msg += 'Message sent\n'
+                    
                 else:
                     self.out_msg += menu
 

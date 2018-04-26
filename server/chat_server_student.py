@@ -13,6 +13,7 @@ import json
 import pickle as pkl
 from chat_utils import *
 import chat_group as grp
+import trivia_server as trivia
 
 class Server:
     def __init__(self):
@@ -26,6 +27,9 @@ class Server:
         self.server.bind(SERVER)
         self.server.listen(5)
         self.all_sockets.append(self.server)
+        self.serverState = "Online"
+        #Trivia variables
+        self.Trivia = trivia.Trivia()
 
     def new_client(self, sock):
         #add to all sockets and to new clients
@@ -77,8 +81,9 @@ class Server:
         #read msg code
         msg = myrecv(from_sock)
         if len(msg) > 0:
+            
 #==============================================================================
-# handle connect request this is implemented for you
+#           Join the game
 #==============================================================================
             msg = json.loads(msg)
             if msg["action"] == "join":
@@ -101,8 +106,9 @@ class Server:
                     msg = json.dumps({"action":"connect", "status":"no-user"})
                 mysend(from_sock, msg)
                 """
+                
 #==============================================================================
-# handle messeage exchange: IMPLEMENT THIS
+#           Message sent to server from player
 #==============================================================================
             elif msg["action"] == "exchange":
                 # Find the list of people to send to and index message!!
@@ -125,12 +131,33 @@ class Server:
                 """
 
 #==============================================================================
-# the "from" guy has had enough (talking to "to")!
+#               TBD: disconnect server chat
 #==============================================================================
             elif msg["action"] == "disconnect":
                 pass
                 #from_name = self.logged_sock2name[from_sock]
                 #self.group.leave(from_name)
+                
+#==============================================================================
+#                 Admin: start trivia game
+#==============================================================================
+            elif msg["action"] == "start":
+                self.playTrivia()
+
+#==============================================================================
+#                 Admin: shutdown server
+#==============================================================================
+            elif msg["action"] == "shutdown":
+                self.serverState = False
+                
+#==============================================================================
+#                 Admin: broadcast message
+#==============================================================================
+            elif msg["action"] == "broadcast":
+                from_name = self.logged_sock2name[from_sock]
+                message = msg["message"]
+                self.sendGlobalMessage("(" + from_name + ") " + message)
+                
 #==============================================================================
 #                 listing available peers: IMPLEMENT THIS (Done)
 #==============================================================================
@@ -139,6 +166,7 @@ class Server:
                 from_name = self.logged_sock2name[from_sock]
                 msg = self.group.list_all()
                 mysend(from_sock, json.dumps({"action":"list", "results":msg}))
+                
 #==============================================================================
 #                 time
 #==============================================================================
@@ -149,12 +177,16 @@ class Server:
 #==============================================================================
 #                 the "from" guy really, really has had enough
 #==============================================================================
-
         else:
             #client died unexpectedly
             self.logout(from_sock)
     
     def sendGlobalMessage(self, text):
+        self.startServerChat(text)
+        self.endServerChat()
+        
+            
+    def startServerChat(self,text = "\n"):
         everyone = list(self.group.list_members())
         msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
         status_msg = json.dumps({"action":"connect", "status":"request", "from":"[Server]"})
@@ -163,12 +195,37 @@ class Server:
             mysend(to_sock, status_msg)
             mysend(to_sock, msg)
             
+    def sendMessage(self,text):
+        everyone = list(self.group.list_members())
+        msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
+        for person in everyone:
+            to_sock = self.logged_name2sock[person]
+            mysend(to_sock, msg)
+        
     def endServerChat(self):
         disconnect_msg = json.dumps({"action":"disconnect"})
         everyone = list(self.group.list_members())
         for person in everyone:
+            to_sock = self.logged_name2sock[person]
             mysend(to_sock, disconnect_msg)
+            
+    def playTrivia(self):
+        questionList = self.Trivia.getQuestion()
+        self.startServerChat()
+        for question in questionList:
+            self.sendMessage(question)
         
+    
+    def closeServer(self, sock):
+        print("Server shutting down...")
+        everyone = list(self.group.list_members())
+        for person in everyone:
+            disconnect_msg = json.dumps({"action":"leave"})
+            socket = self.logged_name2sock[person]
+            mysend(socket, disconnect_msg)
+        time.sleep(3)
+        print("Server has been shut down.")
+        sock.close()
 
 #==============================================================================
 # main loop, loops *forever*
@@ -190,6 +247,9 @@ class Server:
                #new client request
                sock, address=self.server.accept()
                self.new_client(sock)
+           if self.serverState == False:
+               self.closeServer(newc)
+               break
 
 def main():
     server=Server()
