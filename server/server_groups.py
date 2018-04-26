@@ -35,8 +35,15 @@ class Group:
         
     def list_scores(self):
         full_list = "Scoreboard: ------------" + "\n"
-        full_list += str(self.members) + "\n"
+        count = 0
+        for user in sorted(self.members.keys()):
+            full_list += "%d.) %s \t %s\n" % (count, user, self.members[user])
+            count += 1
         return full_list
+    
+    def get_highscore(self):
+        user = max(self.members, key=lambda i: self.members[i])
+        return user, self.members[user]
         
     def is_member(self, name):
         return name in self.members.keys()
@@ -47,7 +54,10 @@ class Group:
 
     def list_all(self):
         full_list = "Players: ------------" + "\n"
-        full_list += str(self.answers) + "\n"
+        count = 0
+        for user in self.answers.keys():
+            full_list += str(count) + ".) " + user + "\n"
+            count += 1
         return full_list
     
     def list_members(self):

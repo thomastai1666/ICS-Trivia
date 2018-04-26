@@ -227,8 +227,10 @@ class Server:
             self.processMessages()
             self.checkQuestions()
         #End game
-        print("Trivia Game has Ended. Thanks for playing!")
-        print(self.group.list_scores())
+        print("Trivia has Ended. Thanks for playing!")
+        winner, score = self.group.get_highscore()
+        self.sendMessage("Highest score is " + str(winner) + " with core: " +str(score))
+        self.sendMessage(self.group.list_scores())
         self.gameState = False
         self.endServerChat()
         
@@ -250,21 +252,19 @@ class Server:
                 msg = ""
                 #Correct, give 10 points
                 if(correct):
-                    msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":"Answer correct! +10 Points"})
+                    msg = json.dumps({"action":"exchange", "from": "[Server]: ", \
+                                      "message":"Answer correct! +10 Points"})
                     self.group.increase_score(player,10)
                 #Incorrect, send right answer
                 else:
-                    msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":"Incorrect. The right answer was: " + chr(65+correctAnswer)})
+                    msg = json.dumps({"action":"exchange", "from": "[Server]: ", \
+                                      "message":"Incorrect. The right answer was: " + str(chr(65+int(correctAnswer)))})
                 #Send messages to player
                 to_sock = self.logged_name2sock[player]
                 mysend(to_sock, msg)
     
-    def showScores(self):
-        #TBD: Show scoreboard
-        pass
-    
     def endGameStats(self):
-        #TBD: Show highest scoring players
+        #Shows highest scoring players
         pass
 
     def closeServer(self, sock):
