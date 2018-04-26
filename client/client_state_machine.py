@@ -73,8 +73,8 @@ class ClientSM:
                     self.out_msg += 'Here are all the users in the system:\n'
                     self.out_msg += logged_in
 
-                elif my_msg == 'join':
-                    mysend(self.s, json.dumps({"action":"join"}))
+                elif my_msg == 'ping':
+                    mysend(self.s, json.dumps({"action":"ping"}))
 
                 else:
                     self.out_msg += menu
@@ -109,6 +109,8 @@ class ClientSM:
                 elif peer_msg["action"] == "leave":
                     self.out_msg += 'You have been disconnected from the server.\n'
                     self.state = S_OFFLINE
+                elif peer_msg["action"] == "pong":
+                    self.out_msg += "Pong!\n"
 
 #==============================================================================
 # Start chatting, 'bye' for quit

@@ -28,9 +28,9 @@ class ClientSM:
     def proc(self, my_msg, peer_msg):
         self.out_msg = ''
 #==============================================================================
-# Once logged in, do a few things: get peer listing, connect, search
-# And, of course, if you are so bored, just go
-# This is event handling instate "S_LOGGEDIN"
+# Admin client does not respond to S_CHATTING events
+# The only state it currently is allowed to be in is S_LOGGEDIN
+# The admin client allows for server side commands that the client should not see
 #==============================================================================
         if self.state == S_LOGGEDIN:
             # todo: can't deal with multiple lines yet
@@ -59,14 +59,8 @@ class ClientSM:
                     self.out_msg += logged_in
 
                 elif my_msg == 'kick':
-                    peer = my_msg[1:]
-                    peer = peer.strip()
-                    if self.connect_to(peer) == True:
-                        self.state = S_CHATTING
-                        self.out_msg += 'Connect to ' + peer + '. Chat away!\n\n'
-                        self.out_msg += '-----------------------------------\n'
-                    else:
-                        self.out_msg += 'Connection unsuccessful\n'
+                    user = my_msg[5:]
+                    self.out_msg += 'Not implemented'
                         
                 elif my_msg == 'shutdown':
                     mysend(self.s, json.dumps({"action":"shutdown"}))

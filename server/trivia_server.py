@@ -47,10 +47,21 @@ class Trivia():
         return self.data[self.currentQuestion][-1]
     
     def checkAnswer(self, ans):
+        #ans = self.stripAnswer(ans)
         if(type(ans) == int):
-            return ans == self.getAnswer(ans)
-        elif(type(ans) == chr):
-            return ans == self.getAnswer(ord(ans) - 65)
+            return ans == self.getAnswer()
+        elif(type(ans) == chr and len(ans) > 0):
+            return ord(ans) - 65 == self.getAnswer()
+        else:
+            return False
+        
+    def stripAnswer(self, ans):
+        ans = ans.strip()
+        newans = ""
+        for character in ans:
+            if type(character) == chr:
+                newans += str(character).toUpper()
+                
     
     def randomQuestion(self):
         return random.randint(0,self.totalQuestions-1)

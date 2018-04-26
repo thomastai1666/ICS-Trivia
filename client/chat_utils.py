@@ -10,7 +10,7 @@ SERVER = (CHAT_IP, CHAT_PORT)
 menu = "\n++++ Choose one of the following commands\n \
         time: Current Time\n \
         who: List all players\n \
-        join: Join the game\n \
+        ping: Ping the server\n \
         quit: Exit the program\n\n"
 
 S_OFFLINE   = 0

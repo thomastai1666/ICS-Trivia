@@ -17,6 +17,7 @@ import trivia_server as trivia
 
 class Server:
     def __init__(self):
+        #Client variables
         self.new_clients = [] #list of new sockets of which the user id is not known
         self.logged_name2sock = {} #dictionary mapping username to socket
         self.logged_sock2name = {} # dict mapping socket to user name
@@ -30,6 +31,8 @@ class Server:
         self.serverState = "Online"
         #Trivia variables
         self.Trivia = trivia.Trivia()
+        self.gameState = False
+        self.waitingForQuestion = False
 
     def new_client(self, sock):
         #add to all sockets and to new clients
@@ -86,8 +89,11 @@ class Server:
 #           Join the game
 #==============================================================================
             msg = json.loads(msg)
-            if msg["action"] == "join":
-                self.sendGlobalMessage("Waiting for game to start...")
+            if msg["action"] == "ping":
+                from_name = self.logged_sock2name[from_sock]
+                msg = json.dumps({"action":"pong"})
+                mysend(from_sock, msg)
+                #self.sendGlobalMessage("Waiting for game to start...")
                 """
                 to_name = msg["target"]
                 from_name = self.logged_sock2name[from_sock]
@@ -108,35 +114,20 @@ class Server:
                 """
                 
 #==============================================================================
-#           Message sent to server from player
+#           Message sent to server from player (Answers)
 #==============================================================================
             elif msg["action"] == "exchange":
                 # Find the list of people to send to and index message!!
                 from_name = self.logged_sock2name[from_sock]
-                print("Message from " + from_name + ": " +msg["message"])
-                """
-                ctime = time.strftime('%d.%m.%y,%H:%M', time.localtime())
-                from_name = self.logged_sock2name[from_sock]
                 from_msg = msg["message"]
-                the_guys = self.group.list_me(from_name)[1:]
-                #Index for current user
-                msg_to_save = ctime + ") " + from_name + " : " + from_msg
-                self.indices[from_name].add_msg_and_index(msg_to_save)
-                for g in the_guys:
-                    #Index for other members of group chat
-                    self.indices[g].add_msg_and_index(msg_to_save)
-                    to_sock = self.logged_name2sock[g]
-                    msg = json.dumps({"action":"exchange", "from": "[" + from_name + "]", "message":from_msg})
-                    mysend(to_sock, msg)
-                """
+                self.group.set_answer(from_name, from_msg)
+                print("Debug: Message from " + from_name + ": " +from_msg)
 
 #==============================================================================
-#               TBD: disconnect server chat
+#               TBD: disconnect from server chat
 #==============================================================================
             elif msg["action"] == "disconnect":
                 pass
-                #from_name = self.logged_sock2name[from_sock]
-                #self.group.leave(from_name)
                 
 #==============================================================================
 #                 Admin: start trivia game
@@ -186,7 +177,7 @@ class Server:
         self.endServerChat()
         
             
-    def startServerChat(self,text = "\n"):
+    def startServerChat(self,text = " "):
         everyone = list(self.group.list_members())
         msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
         status_msg = json.dumps({"action":"connect", "status":"request", "from":"[Server]"})
@@ -210,12 +201,42 @@ class Server:
             mysend(to_sock, disconnect_msg)
             
     def playTrivia(self):
-        questionList = self.Trivia.getQuestion()
-        self.startServerChat()
-        for question in questionList:
-            self.sendMessage(question)
+        self.startServerChat("Trivia has started!")
+        self.gameState = True
+        for x in range(0, self.Trivia.questionLimit):
+            prefix = 65
+            questionList = self.Trivia.getQuestion()
+            self.sendMessage("Question: " + questionList[0])
+            for question in questionList[1:]:
+                self.sendMessage(chr(prefix) + ".) " + question)
+                prefix += 1
+            self.sendMessage("You have ten seconds to answer.")
+            time.sleep(5)
+            read,write,error=select.select(self.all_sockets,[],[])
+            for logc in list(self.logged_name2sock.values()):
+               if logc in read:
+                   self.handle_msg(logc)
+            time.sleep(5)
+            for player in self.group.list_members(): 
+                print("DEBUG", self.group.get_answer(player))
+                correct = self.Trivia.checkAnswer(self.group.get_answer(player))
+                msg = ""
+                if(correct):
+                    msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":"Answer correct!"})
+                else:
+                    msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":"Incorrect."})
+                to_sock = self.logged_name2sock[player]
+                mysend(to_sock, msg)
+        print("Trivia Game has Ended.")
+        self.gameState = False
+        self.endServerChat()
         
+    def showScores(self):
+        pass
     
+    def endGameStats(self):
+        pass
+
     def closeServer(self, sock):
         print("Server shutting down...")
         everyone = list(self.group.list_members())
