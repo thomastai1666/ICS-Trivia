@@ -229,7 +229,7 @@ class Server:
         #End game
         print("Trivia has Ended. Thanks for playing!")
         winner, score = self.group.get_highscore()
-        self.sendMessage("Highest score is " + str(winner) + " with core: " +str(score))
+        self.sendMessage("Highest score is " + str(winner) + " with score: " +str(score))
         self.sendMessage(self.group.list_scores())
         self.gameState = False
         self.endServerChat()

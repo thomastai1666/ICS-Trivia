@@ -8,6 +8,7 @@ Created on Sun Apr  5 09:58:31 2015
 #==============================================================================
 # Group class:
 #==============================================================================
+import prettytable
 
 class Group:
 
@@ -34,10 +35,11 @@ class Group:
         self.members[name] += add
         
     def list_scores(self):
-        full_list = "Scoreboard: ------------" + "\n"
-        count = 0
+        full_list = "\nScoreboard: " + "\n"
+        count = 1
+        full_list += "Name | Score\n" 
         for user in sorted(self.members.keys()):
-            full_list += "%d.) %s \t %s\n" % (count, user, self.members[user])
+            full_list += "%d.) %s %s\n" % (count, user, self.members[user])
             count += 1
         return full_list
     
