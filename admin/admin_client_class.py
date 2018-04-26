@@ -4,7 +4,7 @@ import select
 import sys
 import json
 from admin_utils import *
-import client_state_machine as csm
+import admin_state_machine as csm
 
 import threading
 
@@ -62,7 +62,7 @@ class Client:
     def login(self):
         my_msg, peer_msg = self.get_msgs()
         if len(my_msg) > 0:
-            self.name = my_msg
+            self.name = "[Admin]: "+ my_msg
             msg = json.dumps({"action":"login", "name":self.name})
             self.send(msg)
             response = json.loads(self.recv())

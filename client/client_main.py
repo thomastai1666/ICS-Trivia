@@ -1,5 +1,5 @@
 
-from chat_client_class import *
+from client_class import *
 
 def main():
     import argparse

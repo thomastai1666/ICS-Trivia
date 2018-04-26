@@ -35,7 +35,7 @@ class Group:
         
     def list_scores(self):
         full_list = "Scoreboard: ------------" + "\n"
-        full_list += str(self.answers) + "\n"
+        full_list += str(self.members) + "\n"
         return full_list
         
     def is_member(self, name):
@@ -46,8 +46,8 @@ class Group:
         del self.members[name]
 
     def list_all(self):
-        full_list = "Scoreboard: ------------" + "\n"
-        full_list += str(self.members) + "\n"
+        full_list = "Players: ------------" + "\n"
+        full_list += str(self.answers) + "\n"
         return full_list
     
     def list_members(self):

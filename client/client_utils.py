@@ -8,9 +8,11 @@ CHAT_PORT = 1112
 SERVER = (CHAT_IP, CHAT_PORT)
 
 menu = "\n++++ Choose one of the following commands\n \
+        help: Display menu again\n \
         time: Current Time\n \
         who: List all players\n \
         ping: Ping the server\n \
+        me (text): Display a message to everyone\n \
         quit: Exit the program\n\n"
 
 S_OFFLINE   = 0

@@ -2,7 +2,7 @@
 Created on Sun Apr  5 00:00:32 2015
 @author: zhengzhang
 """
-from chat_utils import *
+from client_utils import *
 import json
 
 class ClientSM:
@@ -44,7 +44,7 @@ class ClientSM:
     def disconnect(self):
         msg = json.dumps({"action":"disconnect"})
         mysend(self.s, msg)
-        self.out_msg += 'You are disconnected from ' + self.peer + '\n'
+        #self.out_msg += 'You are disconnected from ' + self.peer + '\n'
         self.peer = ''
 
     def proc(self, my_msg, peer_msg):
@@ -66,6 +66,9 @@ class ClientSM:
                     mysend(self.s, json.dumps({"action":"time"}))
                     time_in = json.loads(myrecv(self.s))["results"]
                     self.out_msg += "Time is: " + time_in
+                    
+                elif my_msg == 'help' or my_msg == 'menu':
+                    self.out_msg += menu
 
                 elif my_msg == 'who':
                     mysend(self.s, json.dumps({"action":"list"}))
@@ -75,36 +78,19 @@ class ClientSM:
 
                 elif my_msg == 'ping':
                     mysend(self.s, json.dumps({"action":"ping"}))
+                    
+                elif my_msg[:2] == 'me':
+                    msg = my_msg[3:]
+                    mysend(self.s, json.dumps({"action":"me","message":msg}))
 
                 else:
                     self.out_msg += menu
                     
-                """
-                elif my_msg[0] == 'c':
-                    peer = my_msg[1:]
-                    peer = peer.strip()
-                    if self.connect_to(peer) == True:
-                        self.state = S_CHATTING
-                        self.out_msg += 'Connect to ' + peer + '. Chat away!\n\n'
-                        self.out_msg += '-----------------------------------\n'
-                    else:
-                        self.out_msg += 'Connection unsuccessful\n'
-
-                elif my_msg[0] == '?':
-                    term = my_msg[1:].strip()
-                    mysend(self.s, json.dumps({"action":"search", "target":term}))
-                    search_rslt = json.loads(myrecv(self.s))["results"][1:].strip()
-                    if (len(search_rslt)) > 0:
-                        self.out_msg += search_rslt + '\n\n'
-                    else:
-                        self.out_msg += '\'' + term + '\'' + ' not found\n\n'
-                """
-
             if len(peer_msg) > 0:
                 peer_msg = json.loads(peer_msg)
                 if peer_msg["action"] == "connect":
                     self.peer = peer_msg["from"]
-                    self.out_msg += 'Connected to Game Server ' + self.peer + '\n'
+                    #self.out_msg += 'Connected to Game Server ' + self.peer + '\n'
                     self.state = S_CHATTING
                 elif peer_msg["action"] == "leave":
                     self.out_msg += 'You have been disconnected from the server.\n'
@@ -137,8 +123,8 @@ class ClientSM:
 
 
             # Display the menu again
-            if self.state == S_LOGGEDIN:
-                self.out_msg += menu
+            #if self.state == S_LOGGEDIN:
+            #    self.out_msg += menu
 #==============================================================================
 # invalid state
 #==============================================================================

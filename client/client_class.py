@@ -3,7 +3,7 @@ import socket
 import select
 import sys
 import json
-from chat_utils import *
+from client_utils import *
 import client_state_machine as csm
 
 import threading

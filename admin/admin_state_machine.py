@@ -38,7 +38,7 @@ class ClientSM:
             if len(peer_msg) > 0:
                 peer_msg = json.loads(peer_msg)
                 if peer_msg["action"] == "leave":
-                    self.out_msg += 'You have been disconnected from the server.\n'
+                    #self.out_msg += 'You have been disconnected from the server.\n'
                     self.state = S_OFFLINE
                     
             if len(my_msg) > 0:
@@ -58,9 +58,10 @@ class ClientSM:
                     self.out_msg += 'Here are all the users in the system:\n'
                     self.out_msg += logged_in
 
-                elif my_msg == 'kick':
+                elif my_msg[:4] == 'kick':
                     user = my_msg[5:]
-                    self.out_msg += 'Not implemented'
+                    self.out_msg += self.me + " kicked "  + user
+                    mysend(self.s, json.dumps({"action":"kick","user":user}))
                         
                 elif my_msg == 'shutdown':
                     mysend(self.s, json.dumps({"action":"shutdown"}))
