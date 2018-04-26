@@ -46,12 +46,13 @@ class Trivia():
     def getAnswer(self):
         return self.data[self.currentQuestion][-1]
     
-    def checkAnswer(self, ans):
+    def checkAnswer(self, userAns):
         #ans = self.stripAnswer(ans)
-        if(type(ans) == int):
-            return ans == self.getAnswer()
-        elif(type(ans) == chr and len(ans) > 0):
-            return ord(ans) - 65 == self.getAnswer()
+        correctAnswer = chr(65 + int(self.getAnswer()))
+        if(type(userAns) == int):
+            return userAns == ord(correctAnswer)
+        elif(type(userAns) == str and len(userAns) > 0):
+            return userAns == correctAnswer
         else:
             return False
         

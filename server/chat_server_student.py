@@ -211,23 +211,26 @@ class Server:
                 self.sendMessage(chr(prefix) + ".) " + question)
                 prefix += 1
             self.sendMessage("You have ten seconds to answer.")
-            time.sleep(5)
+            time.sleep(10)
             read,write,error=select.select(self.all_sockets,[],[])
             for logc in list(self.logged_name2sock.values()):
                if logc in read:
                    self.handle_msg(logc)
-            time.sleep(5)
             for player in self.group.list_members(): 
-                print("DEBUG", self.group.get_answer(player))
-                correct = self.Trivia.checkAnswer(self.group.get_answer(player))
+                playeranswer = self.group.get_answer(player)
+                correctAnswer = self.Trivia.getAnswer()
+                print("DEBUG", playeranswer)
+                correct = self.Trivia.checkAnswer(playeranswer)
                 msg = ""
                 if(correct):
-                    msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":"Answer correct!"})
+                    msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":"Answer correct! +10 Points"})
+                    self.group.increase_score(player,10)
                 else:
-                    msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":"Incorrect."})
+                    msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":"Incorrect. The right answer was: " + correctAnswer})
                 to_sock = self.logged_name2sock[player]
                 mysend(to_sock, msg)
         print("Trivia Game has Ended.")
+        print(self.group.list_scores())
         self.gameState = False
         self.endServerChat()
         

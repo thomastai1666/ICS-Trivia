@@ -27,11 +27,16 @@ class Group:
             self.answers[name] = ""
         
     def get_answer(self, name):
-        print(self.answers)
+        #print(self.answers[name])
         return self.answers[name]
 
     def increase_score(self, name, add = 10):
         self.members[name] += add
+        
+    def list_scores(self):
+        full_list = "Scoreboard: ------------" + "\n"
+        full_list += str(self.answers) + "\n"
+        return full_list
         
     def is_member(self, name):
         return name in self.members.keys()
