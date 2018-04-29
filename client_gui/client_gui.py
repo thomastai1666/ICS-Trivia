@@ -37,32 +37,7 @@ class TriviaGui:
         else:
             print("Else")
     
-    # create a GUI variable called app
-    def draw_game(self):
-        self.app.setTitle("Trivia")
-        self.app.setBg("white")
-        self.app.setSize("400x600")
-        self.app.setFont(20)
-    
-        # add & configure widgets - widgets get a name, to help referencing them later
-        self.app.addLabel("title", "Trivia Has Started")
-        self.app.setLabelBg("title", "purple")
-        self.app.setLabelFg("title", "white")
-    
-        # link the buttons to the function called press
-    
-        self.app.addLabel("q1", "Question #1")
-        self.app.addButton("One", self.press)
-        self.app.addLabel("q2", "Question #2")
-        self.app.addButton("Two", self.press)
-        self.app.addLabel("q3", "Question #3")
-        self.app.addButton("Three", self.press)
-        self.app.addLabel("q4", "Question #4")
-        self.app.addButton("Four", self.press)
-        self.app.addLabelEntry("Chat")
-        self.app.addButtons(["Send", "Exit Lobby"], self.press)
-    
-        self.app.setFocus("Chat")
+
         
     def draw_menu(self):
         self.app.setTitle("Waiting for Trivia to Start")
@@ -111,10 +86,13 @@ class TriviaGui:
             message = self.client.serverMessages[self.currentLine]
             messageList = message.split(",")
             if(messageList[0] == 'ACTION' and messageList[1] == 'CHAT_IN'):
-                self.app.setTextArea("chatbox", messageList[2] + '\n', end=False, callFunction=True)
+                self.app.setTextArea("chatbox", messageList[2] + '\n', end=False, callFunction=False)
             elif(messageList[0] == 'ACTION' and messageList[1] == 'PEER_CONNECT'):
-                self.app.clearTextArea("players", callFunction=True)
-                self.app.setTextArea("players", messageList[2] + '\n', end=False, callFunction=True)
+                try:
+                    self.app.clearTextArea("players", callFunction=False)
+                    self.app.setTextArea("players", messageList[2] + '\n', end=False, callFunction=False)
+                except:
+                    print("Unable to draw players")
             #elif(messageList[0] == 'ACTION' and messageList[1] == 'BEGIN_GAME'):
             #    self.app.draw_game()
             self.currentLine += 1

@@ -104,7 +104,7 @@ class Server:
                 from_name = self.logged_sock2name[from_sock]
                 from_msg = msg["message"]
                 self.group.set_answer(from_name, from_msg)
-                #print("Debug: Message from " + from_name + ": " +from_msg)
+                print("Debug: Message from " + from_name + ": " +from_msg)
 
 #==============================================================================
 #           Unused: Disconnect (AKA Bye)
@@ -216,14 +216,8 @@ class Server:
         self.gameState = True
         #Loop through x number of questions
         for x in range(0, self.Trivia.questionLimit):
-            #Use decimal character to label questions
-            prefix = 65
-            questionList = self.Trivia.getQuestion()
-            self.sendMessage("Question: " + questionList[0])
-            #Loop through question and choices
-            for question in questionList[1:]:
-                self.sendMessage(chr(prefix) + ".) " + question)
-                prefix += 1
+            question = self.Trivia.getQuestion()
+            self.sendMessage(question)
             #Get client response (wait 10 seconds)
             self.sendMessage("You have ten seconds to answer.")
             time.sleep(10)

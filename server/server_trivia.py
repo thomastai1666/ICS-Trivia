@@ -36,12 +36,18 @@ class Trivia():
     def getQuestion(self):
         if(len(self.usedQuestions) > self.questionLimit):
             return None
+        entireQuestion = ""
         questionNum = self.randomQuestion()
-        while(questionNum in self.usedQuestions):
+        while(questionNum in self.usedQuestions or len(self.data[questionNum]) < 6):
             questionNum = self.randomQuestion()
         self.usedQuestions.append(questionNum)
         self.currentQuestion = questionNum
-        return self.data[questionNum][0:5]
+        entireQuestion += "Question: " + self.data[questionNum][0] + "\n"
+        prefix = 65
+        for question in self.data[questionNum][1:5]:
+                entireQuestion += chr(prefix) + ".) " + question + "\n"
+                prefix += 1
+        return entireQuestion
     
     def getAnswer(self):
         return self.data[self.currentQuestion][-1]
