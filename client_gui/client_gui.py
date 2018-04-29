@@ -115,6 +115,8 @@ class TriviaGui:
             elif(messageList[0] == 'ACTION' and messageList[1] == 'PEER_CONNECT'):
                 self.app.clearTextArea("players", callFunction=True)
                 self.app.setTextArea("players", messageList[2] + '\n', end=False, callFunction=True)
+            #elif(messageList[0] == 'ACTION' and messageList[1] == 'BEGIN_GAME'):
+            #    self.app.draw_game()
             self.currentLine += 1
             
     def send_input(self, text):

@@ -76,6 +76,7 @@ class Server:
         del self.logged_sock2name[sock]
         self.all_sockets.remove(sock)
         self.group.leave(name)
+        self.updatePeers()
         sock.close()
 
 #==============================================================================
@@ -210,6 +211,7 @@ class Server:
             
     def playTrivia(self):
         #Initialize game
+        self.sendToAll(json.dumps({"action":"begingame"}))
         self.startServerChat("Trivia has started!")
         self.gameState = True
         #Loop through x number of questions
