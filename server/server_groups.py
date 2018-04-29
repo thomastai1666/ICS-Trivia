@@ -55,12 +55,18 @@ class Group:
         del self.members[name]
 
     def list_all(self):
+        full_list = ""
+        for name in self.members.keys():
+            full_list += name + "\n"
+        return full_list
+        """
         full_list = "Players: ------------" + "\n"
         count = 0
         for user in self.answers.keys():
             full_list += str(count) + ".) " + user + "\n"
             count += 1
-        return full_list
+        """
+        
     
     def list_members(self):
         return self.members.keys()

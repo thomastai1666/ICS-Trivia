@@ -15,7 +15,8 @@ class Client:
         self.state = S_OFFLINE
         self.system_msg = ''
         self.local_msg = ''
-        self.systemMessages = ''
+        self.totalMessages = 0
+        self.serverMessages = []
         self.peer_msg = ''
         self.args = args
 
@@ -68,7 +69,7 @@ class Client:
             self.send(msg)
             response = json.loads(self.recv())
             if response["status"] == 'ok':
-                self.system_msg += 'SERVER_EVENT: LOGIN_SUCCESS'
+                self.system_msg += 'SERVER_EVENT: LOGIN_SUCCESS\n'
                 self.state = S_LOGGEDIN
                 self.sm.set_state(S_LOGGEDIN)
                 self.sm.set_myname(self.name)
@@ -76,16 +77,18 @@ class Client:
                 return (True)
             elif response["status"] == 'duplicate':
                 #self.system_msg += 'Duplicate username, try again'
-                self.system_msg += 'SERVER_EVENT: LOGIN_DUPLICATE'
+                self.system_msg += 'SERVER_EVENT: LOGIN_DUPLICATE\n'
                 return False
         else:               # fix: dup is only one of the reasons
            return(False)
-
 
     def read_input(self):
         while True:
             text = sys.stdin.readline()[:-1]
             self.console_input.append(text) # no need for lock, append is thread safe
+            
+    def send_input(self, text):
+            self.console_input.append(text)
 
     def print_instructions(self):
         self.system_msg += menu
@@ -112,4 +115,6 @@ class Client:
     def proc(self):
         my_msg, peer_msg = self.get_msgs()
         self.system_msg += self.sm.proc(my_msg, peer_msg)
-        self.systemMessages += self.system_msg
+        if len(self.system_msg) > 0:
+            self.serverMessages.append(self.system_msg)
+            self.totalMessages += 1

@@ -58,6 +58,7 @@ class Server:
                         print(name + ' logged in')
                         self.group.join(name)
                         mysend(sock, json.dumps({"action":"login", "status":"ok"}))
+                        self.updatePeers()
                     else: #a client under this name has already logged in
                         mysend(sock, json.dumps({"action":"login", "status":"duplicate"}))
                         print(name + ' duplicate login attempt')
@@ -177,35 +178,35 @@ class Server:
         self.startServerChat(text)
         self.endServerChat()
         
+    def updatePeers(self):
+        getPeers = self.group.list_all()
+        self.sendToAll(json.dumps({"action":"updatepeers", "name":getPeers}))
             
     def startServerChat(self,text = " "):
         #Start chat exchange for trivia game
-        everyone = list(self.group.list_members())
         msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
         status_msg = json.dumps({"action":"connect", "status":"request", "from":"[Server]"})
-        for person in everyone:
-            to_sock = self.logged_name2sock[person]
-            mysend(to_sock, status_msg)
-            mysend(to_sock, msg)
+        self.sendToAll(status_msg)
+        self.sendToAll(msg)
             
     def sendMessage(self,text,label = True):
         #Send message through chat exchange
-        everyone = list(self.group.list_members())
         if label:
             msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
         else:
             msg = json.dumps({"action":"exchange", "message":text})
-        for person in everyone:
-            to_sock = self.logged_name2sock[person]
-            mysend(to_sock, msg)
+        self.sendToAll(msg)
         
     def endServerChat(self):
         #Disconnect client from server chat
         disconnect_msg = json.dumps({"action":"disconnect"})
+        self.sendToAll(disconnect_msg)
+            
+    def sendToAll(self, msg):
         everyone = list(self.group.list_members())
         for person in everyone:
             to_sock = self.logged_name2sock[person]
-            mysend(to_sock, disconnect_msg)
+            mysend(to_sock, msg)
             
     def playTrivia(self):
         #Initialize game

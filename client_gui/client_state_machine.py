@@ -97,6 +97,9 @@ class ClientSM:
                     self.state = S_OFFLINE
                 elif peer_msg["action"] == "pong":
                     self.out_msg += "Pong!\n"
+                elif peer_msg["action"] == 'updatepeers':
+                    allPeers = peer_msg["name"]
+                    self.out_msg += "ACTION,PEER_CONNECT," + allPeers
 
 #==============================================================================
 # Start chatting, 'bye' for quit
@@ -119,7 +122,7 @@ class ClientSM:
                     self.out_msg += 'You have been disconnected from the server.\n'
                     self.state = S_OFFLINE
                 else:
-                    self.out_msg += peer_msg["from"] + peer_msg["message"]
+                    self.out_msg += "ACTION,CHAT_IN," + peer_msg["from"] + peer_msg["message"]
 
 
             # Display the menu again
