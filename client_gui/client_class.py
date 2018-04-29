@@ -15,6 +15,7 @@ class Client:
         self.state = S_OFFLINE
         self.system_msg = ''
         self.local_msg = ''
+        self.systemMessages = ''
         self.peer_msg = ''
         self.args = args
 
@@ -67,13 +68,15 @@ class Client:
             self.send(msg)
             response = json.loads(self.recv())
             if response["status"] == 'ok':
+                self.system_msg += 'SERVER_EVENT: LOGIN_SUCCESS'
                 self.state = S_LOGGEDIN
                 self.sm.set_state(S_LOGGEDIN)
                 self.sm.set_myname(self.name)
                 self.print_instructions()
                 return (True)
             elif response["status"] == 'duplicate':
-                self.system_msg += 'Duplicate username, try again'
+                #self.system_msg += 'Duplicate username, try again'
+                self.system_msg += 'SERVER_EVENT: LOGIN_DUPLICATE'
                 return False
         else:               # fix: dup is only one of the reasons
            return(False)
@@ -89,12 +92,13 @@ class Client:
 
     def run_chat(self):
         self.init_chat()
-        self.system_msg += 'Welcome to Trivia\n'
-        self.system_msg += 'Please enter your name: '
+        #self.system_msg += 'Welcome to Trivia\n'
+        #self.system_msg += 'Please enter your name: '
+        self.system_msg += "CLIENT_EVENT: LOGIN_PROMPT"
         self.output()
         while self.login() != True:
             self.output()
-        self.system_msg += 'Welcome, ' + self.get_name() + '!'
+        #self.system_msg += 'Welcome, ' + self.get_name() + '!'
         self.output()
         while self.sm.get_state() != S_OFFLINE:
             self.proc()
@@ -108,3 +112,4 @@ class Client:
     def proc(self):
         my_msg, peer_msg = self.get_msgs()
         self.system_msg += self.sm.proc(my_msg, peer_msg)
+        self.systemMessages += self.system_msg

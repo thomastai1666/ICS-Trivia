@@ -1,4 +1,3 @@
-
 from client_class import *
 
 def main():
