@@ -86,15 +86,17 @@ class TriviaGui:
             message = self.client.serverMessages[self.currentLine]
             messageList = message.split(",")
             if(messageList[0] == 'ACTION' and messageList[1] == 'CHAT_IN'):
-                self.app.setTextArea("chatbox", messageList[2] + '\n', end=False, callFunction=False)
+                chat_message = ""
+                for message in messageList[2:]:
+                    chat_message += message
+                chat_message += '\n'
+                self.app.setTextArea("chatbox", chat_message, end=False, callFunction=False)
             elif(messageList[0] == 'ACTION' and messageList[1] == 'PEER_CONNECT'):
                 try:
                     self.app.clearTextArea("players", callFunction=False)
                     self.app.setTextArea("players", messageList[2] + '\n', end=False, callFunction=False)
                 except:
                     print("Unable to draw players")
-            #elif(messageList[0] == 'ACTION' and messageList[1] == 'BEGIN_GAME'):
-            #    self.app.draw_game()
             self.currentLine += 1
             
     def send_input(self, text):

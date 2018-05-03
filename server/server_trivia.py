@@ -30,6 +30,10 @@ class Trivia():
             line_items = line.split(',')
             self.data.append(line_items)
             
+    def resetUsedQuestions(self):
+        self.usedQuestions = []
+        return None
+            
     def printData(self):
         return str(self.data) + "\n"
         

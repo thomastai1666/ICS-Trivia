@@ -58,6 +58,7 @@ class Server:
                         print(name + ' logged in')
                         self.group.join(name)
                         mysend(sock, json.dumps({"action":"login", "status":"ok"}))
+                        self.sendPrivateChat(sock, "You are connected to the server")
                         self.updatePeers()
                     else: #a client under this name has already logged in
                         mysend(sock, json.dumps({"action":"login", "status":"duplicate"}))
@@ -182,7 +183,16 @@ class Server:
     def updatePeers(self):
         getPeers = self.group.list_all()
         self.sendToAll(json.dumps({"action":"updatepeers", "name":getPeers}))
-            
+    
+    def sendPrivateChat(self,to_sock,text = " "):
+        #Start chat exchange for trivia game
+        chat_msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
+        connect_msg = json.dumps({"action":"connect", "status":"request", "from":"[Server]"})
+        disconnect_msg = json.dumps({"action":"disconnect"})
+        mysend(to_sock, connect_msg)
+        mysend(to_sock, chat_msg)
+        mysend(to_sock, disconnect_msg)
+    
     def startServerChat(self,text = " "):
         #Start chat exchange for trivia game
         msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
@@ -224,6 +234,7 @@ class Server:
             self.processMessages()
             self.checkQuestions()
         #End game
+        self.Trivia.resetUsedQuestions()
         print("Trivia has Ended. Thanks for playing!")
         winner, score = self.group.get_highscore()
         self.sendMessage("Highest score is " + str(winner) + " with score: " +str(score))
