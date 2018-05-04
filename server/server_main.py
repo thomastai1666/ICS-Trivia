@@ -131,10 +131,13 @@ class Server:
             elif msg["action"] == "kick":
                 admin_name = self.logged_sock2name[from_sock]
                 user = msg["user"]
-                socket = self.logged_name2sock[user]
-                self.sendGlobalMessage(admin_name + " kicked "  + user)
-                disconnect_msg = json.dumps({"action":"leave"})
-                mysend(socket, disconnect_msg)
+                socket = self.logged_name2sock.get(user, False)
+                if not socket:
+                    self.sendPrivateChat(from_sock,"User not found")
+                else:
+                    self.sendGlobalMessage(admin_name + " kicked "  + user)
+                    disconnect_msg = json.dumps({"action":"leave"})
+                    mysend(socket, disconnect_msg)
                 
 #==============================================================================
 #           Admin: broadcast message
@@ -159,8 +162,8 @@ class Server:
             elif msg["action"] == "me":
                 #pass
                 from_name = self.logged_sock2name[from_sock]
-                message = from_name + " says " + msg["message"]
-                self.sendGlobalMessage(message)
+                message = msg["message"]
+                self.sendGlobalMessage(message, from_name + ": ")
                 
 #==============================================================================
 #           Client: Display time
@@ -175,9 +178,9 @@ class Server:
     
 #==============================================================================
 
-    def sendGlobalMessage(self, text):
+    def sendGlobalMessage(self, text, prefix = "[Server]: "):
         #Sends a single message to all clients
-        self.startServerChat(text)
+        self.startServerChat(text, prefix)
         self.endServerChat()
         
     def updatePeers(self):
@@ -193,19 +196,16 @@ class Server:
         mysend(to_sock, chat_msg)
         mysend(to_sock, disconnect_msg)
     
-    def startServerChat(self,text = " "):
+    def startServerChat(self,text = " ",prefix = "[Server]: "):
         #Start chat exchange for trivia game
-        msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
+        msg = json.dumps({"action":"exchange", "from": prefix, "message":text})
         status_msg = json.dumps({"action":"connect", "status":"request", "from":"[Server]"})
         self.sendToAll(status_msg)
         self.sendToAll(msg)
             
     def sendMessage(self,text,label = True):
         #Send message through chat exchange
-        if label:
-            msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
-        else:
-            msg = json.dumps({"action":"exchange", "message":text})
+        msg = json.dumps({"action":"exchange", "from": "[Server]: ", "message":text})
         self.sendToAll(msg)
         
     def endServerChat(self):
