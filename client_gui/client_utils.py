@@ -3,9 +3,6 @@ import time
 
 # use local loop back address by default
 #CHAT_IP = '10.209.3.155'
-CHAT_IP = socket.gethostbyname(socket.gethostname())
-CHAT_PORT = 1112
-SERVER = (CHAT_IP, CHAT_PORT)
 
 menu = "\n++++ Choose one of the following commands\n \
         help: Display menu again\n \

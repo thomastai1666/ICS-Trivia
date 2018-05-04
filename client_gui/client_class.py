@@ -27,7 +27,10 @@ class Client:
     def get_name(self):
         return self.name
 
-    def init_chat(self):
+    def init_chat(self, address):
+        CHAT_IP = address
+        CHAT_PORT = 1112
+        SERVER = (CHAT_IP, CHAT_PORT)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM )
         svr = SERVER if self.args.d == None else (self.args.d, CHAT_PORT)
         self.socket.connect(svr)
@@ -93,8 +96,8 @@ class Client:
     def print_instructions(self):
         self.system_msg += menu
 
-    def run_chat(self):
-        self.init_chat()
+    def run_chat(self, address):
+        self.init_chat(address)
         #self.system_msg += 'Welcome to Trivia\n'
         #self.system_msg += 'Please enter your name: '
         self.system_msg += "CLIENT_EVENT: LOGIN_PROMPT"

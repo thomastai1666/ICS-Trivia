@@ -1,6 +1,7 @@
 # import the library
 from appJar import gui
 from client_class import *
+import socket
 
 # handle button events
 class TriviaGui:
@@ -9,8 +10,6 @@ class TriviaGui:
         self.app = gui("Trivia")
         self.client = None
         self.currentLine = 0
-        self.app.registerEvent(self.process_input)
-        self.app.thread(self.main)
         self.draw_login()
         self.app.go()
     
@@ -30,6 +29,10 @@ class TriviaGui:
             self.app.clearEntry("Chat")
         elif button == "Submit":
             usr = self.app.getEntry("Username")
+            address = self.app.getEntry("Server IP")
+            self.app.thread(self.main, address)
+            time.sleep(1)
+            self.app.registerEvent(self.process_input)
             self.send_input(usr)
             self.app.removeAllWidgets()
             self.draw_menu()
@@ -74,7 +77,8 @@ class TriviaGui:
         self.app.setLabelFg("title", "white")
         
         self.app.addLabelEntry("Username")
-        #app.addLabelEntry("Server IP")
+        self.app.addLabelEntry("Server IP")
+        self.app.setEntry("Server IP", socket.gethostbyname(socket.gethostname()))
         
         # link the buttons to the function called press
         self.app.addButtons(["Submit", "Cancel"], self.press)
@@ -102,14 +106,14 @@ class TriviaGui:
     def send_input(self, text):
         self.client.send_input(text)
             
-    def main(self):
+    def main(self, address):
         import argparse
         parser = argparse.ArgumentParser(description='chat client argument')
         parser.add_argument('-d', type=str, default=None, help='server IP addr')
         args = parser.parse_args()
     
         self.client = Client(args)
-        self.client.run_chat()
+        self.client.run_chat(address)
         while(True):
             self.process_input()
         
