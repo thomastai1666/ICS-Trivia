@@ -1,6 +1,5 @@
 Question,Choice1,Choice2,Choice3,Choice4,Answer
-What is the capital of New Jersey?,Trenton,Camden,Cherry Hill,Philidelphia,0
-How do you say hello in Chinese?,hey lo,peng you,hola,ni hao,3
-Which is the world's largest ocean?,Atlantic,Pacific,Red,Black Sea,0
-Who was the founder of GitHub?,George Bush,John Houston,Tom Preston-Werner,Mark Zuckerburg,2
 What is 101 in decimal?,2,3,4,5,3
+What is the Algorithmic Complexity of Merge Sort?,nlogn,n squared,n,n cubed,0
+What is 5th number in the Fibonacci sequence?,2,4,5,3,3
+What does Amdal's Law describe?,AI,Parallelism,Development Time,Functions,1
