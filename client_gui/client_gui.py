@@ -2,7 +2,6 @@
 from appJar import gui
 from client_class import *
 import socket
-
 # handle button events
 class TriviaGui:
     
@@ -20,8 +19,6 @@ class TriviaGui:
             self.app.stop()
         elif button == "Exit Lobby":
             self.app.stop()
-        elif button == "One" or button == "Two" or button == "Three" or button == "Four":
-            print("Answer", button)
         elif button == "Send":
             chat = self.app.getEntry("Chat")
             self.send_input("me " + chat)
@@ -38,7 +35,7 @@ class TriviaGui:
             self.draw_menu()
             print("User:", usr)
         else:
-            print("Else")
+            print("Menu error: ", button)
     
 
         
@@ -100,7 +97,7 @@ class TriviaGui:
                     self.app.clearTextArea("players", callFunction=False)
                     self.app.setTextArea("players", messageList[2] + '\n', end=False, callFunction=False)
                 except:
-                    print("Unable to draw players")
+                    print("Unable to list players")
             self.currentLine += 1
             
     def send_input(self, text):
